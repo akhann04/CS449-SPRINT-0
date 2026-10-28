@@ -15,7 +15,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-// THIS CLASS HANDLES THE WINDOW, BUTTONS, AND PLAYER CLICKS.
+// THIS CLASS HANDLES THE WINDOW AND PLAYER CLICKS.
 public class SolitareGUI extends JFrame {
 
     private static final long serialVersionUID = 1L;
@@ -36,7 +36,7 @@ public class SolitareGUI extends JFrame {
     public SolitareGUI() {
         game = new SolitareGame();
 
-        // SET UP THE MAIN GAME WINDOW.
+        // SET UP THE MAIN WINDOW.
         setTitle("Peg Solitare");
         setSize(760, 760);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -47,56 +47,60 @@ public class SolitareGUI extends JFrame {
             "Peg Solitare",
             SwingConstants.CENTER
         );
+
         title.setFont(new Font("Dialog", Font.BOLD, 24));
 
-        // LET THE PLAYER CHOOSE A BOARD TYPE.
+        // ADD THE BOARD TYPE OPTIONS.
         String[] boardTypes = {
             "English", "Hexagon", "Diamond"
         };
+
         boardTypeBox = new JComboBox<>(boardTypes);
 
-        // LET THE PLAYER CHOOSE A BOARD SIZE.
+        // ADD THE BOARD SIZE OPTIONS.
         Integer[] boardSizes = {7, 9, 11};
         boardSizeBox = new JComboBox<>(boardSizes);
 
         boardTypeBox.setSelectedItem(game.getBoardType());
         boardSizeBox.setSelectedItem(game.getBoardSize());
 
-        // PUT THE BOARD OPTIONS ABOVE THE BOARD.
+        // PUT THE OPTIONS AT THE TOP OF THE WINDOW.
         JPanel settingsPanel = new JPanel();
 
         settingsPanel.add(new JLabel("Board type:"));
         settingsPanel.add(boardTypeBox);
-
         settingsPanel.add(new JLabel("Board size:"));
         settingsPanel.add(boardSizeBox);
 
         JPanel topPanel = new JPanel(new BorderLayout());
+
         topPanel.add(title, BorderLayout.NORTH);
         topPanel.add(settingsPanel, BorderLayout.CENTER);
 
         add(topPanel, BorderLayout.NORTH);
 
-        // THIS PANEL HOLDS THE MARBLE BUTTONS.
+        // THIS PANEL HOLDS THE BOARD BUTTONS.
         boardPanel = new JPanel();
+
         boardPanel.setBorder(
             BorderFactory.createEmptyBorder(20, 20, 20, 20)
         );
+
         add(boardPanel, BorderLayout.CENTER);
 
-        // SHOW INSTRUCTIONS AND THE NUMBER OF MARBLES LEFT.
+        // SHOW THE INSTRUCTIONS AND MARBLE COUNT.
         statusLabel = new JLabel("", SwingConstants.CENTER);
         updateStatus("Select a marble.");
 
         JButton newGameButton = new JButton("New Game");
 
-        // APPLY THE CHOSEN SETTINGS WHEN NEW GAME IS CLICKED.
         newGameButton.addActionListener(event -> startNewGame());
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(newGameButton);
 
         JPanel controls = new JPanel(new BorderLayout(5, 5));
+
         controls.add(statusLabel, BorderLayout.NORTH);
         controls.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -105,16 +109,17 @@ public class SolitareGUI extends JFrame {
         displayBoard();
     }
 
-    // START A NEW GAME WITH THE SELECTED SIZE AND TYPE.
+    // START A GAME USING THE SELECTED OPTIONS.
     private void startNewGame() {
         int size = (Integer) boardSizeBox.getSelectedItem();
         String type = (String) boardTypeBox.getSelectedItem();
 
         game.startNewGame(size, type);
 
-        // CLEAR THE OLD SELECTION AND CHECK THE NEW BOARD.
+        // CLEAR THE OLD MARBLE SELECTION.
         selectedRow = -1;
         selectedCol = -1;
+
         gameOver = game.isGameOver();
 
         updateStatus("Select a marble.");
@@ -126,29 +131,31 @@ public class SolitareGUI extends JFrame {
         }
     }
 
-    // UPDATE THE MESSAGE AND MARBLE COUNT BELOW THE BOARD.
+    // UPDATE THE MESSAGE BELOW THE BOARD.
     private void updateStatus(String message) {
         statusLabel.setText(
             message + "  Marbles left: " + game.countPegs()
         );
     }
 
-    // DRAW THE BOARD USING THE CURRENT GAME DATA.
+    // DRAW THE BOARD USING THE GAME DATA.
     private void displayBoard() {
         boardPanel.removeAll();
 
         int size = game.getBoardSize();
-        boardPanel.setLayout(new GridLayout(size, size, 5, 5));
 
-        // USE SMALLER MARBLES ON BIGGER BOARDS.
+        boardPanel.setLayout(
+            new GridLayout(size, size, 5, 5)
+        );
+
+        // USE SMALLER MARBLES FOR BIGGER BOARDS.
         int fontSize = Math.max(18, 36 - size);
 
         for (int row = 0; row < size; row++) {
             for (int col = 0; col < size; col++) {
-
                 int cell = game.getCell(row, col);
 
-                // LEAVE A BLANK SPACE OUTSIDE THE BOARD SHAPE.
+                // LEAVE BLANK SPACES OUTSIDE THE BOARD SHAPE.
                 if (cell == SolitareGame.INVALID) {
                     boardPanel.add(new JPanel());
                     continue;
@@ -160,16 +167,17 @@ public class SolitareGUI extends JFrame {
                 hole.setFont(
                     new Font("Dialog", Font.BOLD, fontSize)
                 );
+
                 hole.setForeground(new Color(0, 120, 60));
                 hole.setFocusPainted(false);
                 hole.setMargin(new Insets(0, 0, 0, 0));
 
-                // SHOW A GREEN CIRCLE IF THE HOLE HAS A MARBLE.
+                // SHOW A CIRCLE WHEN A MARBLE IS PRESENT.
                 if (cell == SolitareGame.PEG) {
                     hole.setText("\u25CF");
                 }
 
-                // GIVE THE SELECTED MARBLE AN ORANGE OUTLINE.
+                // OUTLINE THE SELECTED MARBLE IN ORANGE.
                 if (row == selectedRow && col == selectedCol) {
                     hole.setBorder(
                         BorderFactory.createLineBorder(
@@ -178,7 +186,7 @@ public class SolitareGUI extends JFrame {
                     );
                 }
 
-                // SAVE THIS BUTTON'S POSITION FOR ITS CLICK ACTION.
+                // REMEMBER WHICH POSITION THIS BUTTON USES.
                 final int clickedRow = row;
                 final int clickedCol = col;
 
@@ -190,7 +198,7 @@ public class SolitareGUI extends JFrame {
             }
         }
 
-        // REFRESH THE BOARD AFTER REBUILDING THE BUTTONS.
+        // REFRESH THE BOARD AFTER THE BUTTONS ARE ADDED.
         boardPanel.revalidate();
         boardPanel.repaint();
     }
@@ -198,7 +206,7 @@ public class SolitareGUI extends JFrame {
     // HANDLE THE POSITION THE PLAYER CLICKED.
     private void handleClick(int row, int col) {
 
-        // STOP ACCEPTING MOVES AFTER THE GAME ENDS.
+        // STOP MOVES AFTER THE GAME ENDS.
         if (gameOver) {
             return;
         }
@@ -209,28 +217,31 @@ public class SolitareGUI extends JFrame {
             if (row == selectedRow && col == selectedCol) {
                 selectedRow = -1;
                 selectedCol = -1;
+
                 updateStatus("Select a marble.");
+
             } else {
 
                 // SELECT THE MARBLE THE PLAYER CLICKED.
                 selectedRow = row;
                 selectedCol = col;
+
                 updateStatus("Now select an empty hole.");
             }
 
         } else if (selectedRow == -1) {
 
-            // AN EMPTY HOLE CANNOT BE SELECTED FIRST.
+            // THE PLAYER NEEDS TO SELECT A MARBLE FIRST.
             updateStatus("Select a marble first.");
 
         } else if (game.makeMove(
                 selectedRow, selectedCol, row, col)) {
 
-            // CLEAR THE SELECTION AFTER A SUCCESSFUL MOVE.
+            // CLEAR THE SELECTION AFTER A VALID MOVE.
             selectedRow = -1;
             selectedCol = -1;
 
-            // ASK THE GAME LOGIC IF ANY MOVES ARE LEFT.
+            // CHECK WHETHER ANY VALID MOVES REMAIN.
             gameOver = game.isGameOver();
 
             if (gameOver) {
@@ -249,14 +260,16 @@ public class SolitareGUI extends JFrame {
 
         } else {
 
-            // KEEP THE BOARD THE SAME WHEN THE MOVE IS INVALID.
-            updateStatus("Invalid move. Choose another empty hole.");
+            // LET THE PLAYER KNOW THE MOVE WAS INVALID.
+            updateStatus(
+                "Invalid move. Choose another empty hole."
+            );
         }
 
         displayBoard();
     }
 
-    // SHOW THE RESULT WHEN THE GAME ENDS.
+    // SHOW THE FINAL RESULT.
     private void showGameOverMessage() {
         int remaining = game.countPegs();
         String message;
