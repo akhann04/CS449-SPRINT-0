@@ -3,6 +3,7 @@ package solitare;
 // THIS CLASS HANDLES THE BOARD AND THE GAME RULES.
 public class SolitareGame {
 
+    // THESE NUMBERS TELL US WHAT EACH BOARD POSITION CONTAINS.
     public static final int INVALID = -1;
     public static final int EMPTY = 0;
     public static final int PEG = 1;
